@@ -14,5 +14,6 @@ class Main inherits IO {
     } else {
       a: Int <- 5;
     }
+    fi;
   };
 };

@@ -11,6 +11,15 @@ template <class Elem> class nil_node;
 template <class Elem> class single_list_node;
 template <class Elem> class append_node;
 
+class class__class;
+
+class Visitor {
+public:
+  virtual void visit(class__class &obj) {}
+  virtual ~Visitor() = default;
+};
+
+
 class tree_node {
 protected:
   // line number when node is created
@@ -26,6 +35,8 @@ public:
     line_number = t->line_number;
     return this;
   }
+
+  virtual void accept(Visitor &v) {}
 };
 
 // Lists of objects

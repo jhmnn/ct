@@ -5,6 +5,7 @@
 
 #include "cool-parse.h"
 #include "cool-tree.h"
+#include "semantic-analyzer.hpp"
 #include "utilities.h"
 
 std::FILE *token_file = stdin;
@@ -33,30 +34,34 @@ int main(int argc, char **argv) {
       std::cerr << "Error: can not open file " << argv[i] << std::endl;
       std::exit(1);
     }
-    
+
     curr_lineno = 1;
 
     cool_yyparse();
     if (parse_errors != 0) {
       std::cerr << "Error: parse errors\n";
-      std::exit(1);
     }
 
-    ast_root->dump_with_types(std::cerr, 0);
+    // ast_root->dump_with_types(std::cerr, 0);
 
-    std::cerr << '\n';
+    // std::cerr << '\n';
 
-    std::cerr << "[Identifiers]\n";
-    idtable.print();
-    std::cerr << '\n';
-    std::cerr << "[Integers]\n";
-    inttable.print();
-    std::cerr << '\n';
-    std::cerr << "[Strings]\n";
-    stringtable.print();
+    // std::cerr << "[Identifiers]\n";
+    // idtable.print();
+    // std::cerr << '\n';
+    // std::cerr << "[Integers]\n";
+    // inttable.print();
+    // std::cerr << '\n';
+    // std::cerr << "[Strings]\n";
+    // stringtable.print();
+
+    std::cout << '\n';
+
+    sa::SemanticAnalyzer san(parse_results);
+    san.analyze();
 
     std::fclose(token_file);
   }
-  
+
   return 0;
 }

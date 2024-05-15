@@ -132,6 +132,9 @@ class program_class : public Program_class {
 
 // define constructor - class_
 class class__class : public Class__class {
+  friend class GetName;
+  friend class GetParentName;
+
  protected:
   Symbol name;
   Symbol parent;
@@ -147,6 +150,8 @@ class class__class : public Class__class {
   }
   Class_ copy_Class_();
   void dump(std::ostream &stream, int n);
+
+  void accept(Visitor &v) override { v.visit(*this); }
 
 #ifdef Class__SHARED_EXTRAS
   Class__SHARED_EXTRAS
@@ -748,6 +753,19 @@ class object_class : public Expression_class {
 #ifdef object_EXTRAS
       object_EXTRAS
 #endif
+};
+
+class GetName : public Visitor {
+ public:
+  std::string value;
+  void visit(class__class &obj) override { value = obj.name->get_string(); }
+};
+
+class GetParentName : public Visitor {
+ public:
+  std::string value;
+
+  void visit(class__class &ref) override { value = ref.parent->get_string(); }
 };
 
 // define the prototypes of the interface

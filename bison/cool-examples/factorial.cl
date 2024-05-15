@@ -13,12 +13,12 @@ class Main inherits IO {
     };
 
     factorial(num: Int): Int {
-        if num = 0 then 1 else num * factorial(num - 1) fi
+        if num = 0 then 1 else num * factorial(num - 1) fi;
     };
 };
 
 class Main1 inherits IO {
     factorial(num: Int): Int {
-        if num = 0 then 1 else num * factorial(num - 1) fi
+        if num = 0 then 1 else num * factorial(num - 1) fi;
     };
 };
