@@ -56,12 +56,12 @@ typedef Cases_class *Cases;
 
 #define program_EXTRAS void dump_with_types(std::ostream &, int);
 
-#define Class__EXTRAS                \
-  virtual Symbol get_filename() = 0; \
+#define Class__EXTRAS                                                          \
+  virtual Symbol get_filename() = 0;                                           \
   virtual void dump_with_types(std::ostream &, int) = 0;
 
-#define class__EXTRAS                        \
-  Symbol get_filename() { return filename; } \
+#define class__EXTRAS                                                          \
+  Symbol get_filename() { return filename; }                                   \
   void dump_with_types(std::ostream &, int);
 
 #define Feature_EXTRAS virtual void dump_with_types(std::ostream &, int) = 0;
@@ -76,23 +76,23 @@ typedef Cases_class *Cases;
 
 #define branch_EXTRAS void dump_with_types(std::ostream &, int);
 
-#define Expression_EXTRAS                                \
-  Symbol type;                                           \
-  Symbol get_type() { return type; }                     \
-  Expression set_type(Symbol s) {                        \
-    type = s;                                            \
-    return this;                                         \
-  }                                                      \
-  virtual void dump_with_types(std::ostream &, int) = 0; \
-  void dump_type(std::ostream &, int);                   \
-  Expression parent;                                     \
-  virtual void set_body(const Expression e) {}           \
+#define Expression_EXTRAS                                                      \
+  Symbol type;                                                                 \
+  Symbol get_type() { return type; }                                           \
+  Expression set_type(Symbol s) {                                              \
+    type = s;                                                                  \
+    return this;                                                               \
+  }                                                                            \
+  virtual void dump_with_types(std::ostream &, int) = 0;                       \
+  void dump_type(std::ostream &, int);                                         \
+  Expression parent;                                                           \
+  virtual void set_body(const Expression e) {}                                 \
   Expression_class() { type = (Symbol)NULL; }
 
-#define let_EXTRAS                             \
-  void set_body(const Expression e) override { \
-    e->parent = this;                          \
-    body = e;                                  \
+#define let_EXTRAS                                                             \
+  void set_body(const Expression e) override {                                 \
+    e->parent = this;                                                          \
+    body = e;                                                                  \
   }
 
 #define Expression_SHARED_EXTRAS void dump_with_types(std::ostream &, int);

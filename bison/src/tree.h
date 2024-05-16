@@ -12,13 +12,16 @@ template <class Elem> class single_list_node;
 template <class Elem> class append_node;
 
 class class__class;
+class method_class;
+class attr_class;
 
 class Visitor {
 public:
   virtual void visit(class__class &obj) {}
+  virtual void visit(method_class &obj) {}
+  virtual void visit(attr_class &obj) {}
   virtual ~Visitor() = default;
 };
-
 
 class tree_node {
 protected:

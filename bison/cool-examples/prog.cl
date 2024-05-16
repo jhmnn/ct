@@ -12,7 +12,7 @@ class Main inherits IO {
       out_string("\A\n \
                         string");
     } else {
-      a: Int <- 5;
+      let a: Int <- 5 in true;
     }
     fi;
   };
