@@ -7,13 +7,11 @@
 *)
 
 class Main inherits IO {
-  main() : Object {
-    if 1 < 2 then {
-      out_string("\A\n \
-                        string");
-    } else {
+  main(a : Int): Object {
+    {
       let a: Int <- 5 in true;
+      let b: Int <- 5 in true;
+      let b: Int <- 5 in true;
     }
-    fi;
   };
 };

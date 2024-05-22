@@ -1,5 +1,5 @@
 class Main inherits IO {
-    main(): Object {
+    main(): Object {{
         out_string("Enter an integer greater-than or equal-to 0: ");
         let input: Int <- in_int() in
             if input < 0 then
@@ -10,15 +10,15 @@ class Main inherits IO {
                 out_string("\n");
             }
             fi;
-    };
+    }};
 
-    factorial(num: Int): Int {
+    factorial(num: Int): Int {{
         if num = 0 then 1 else num * factorial(num - 1) fi;
-    };
+    }};
 };
 
 class Main1 inherits IO {
-    factorial(num: Int): Int {
+    factorial(num: Int): Int {{
         if num = 0 then 1 else num * factorial(num - 1) fi;
-    };
+    }};
 };

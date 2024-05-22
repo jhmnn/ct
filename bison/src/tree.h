@@ -14,12 +14,18 @@ template <class Elem> class append_node;
 class class__class;
 class method_class;
 class attr_class;
+class formal_class;
+class block_class;
+class let_class;
 
 class Visitor {
 public:
   virtual void visit(class__class &obj) {}
   virtual void visit(method_class &obj) {}
   virtual void visit(attr_class &obj) {}
+  virtual void visit(formal_class &obj) {}
+  virtual void visit(block_class &obj) {}
+  virtual void visit(let_class &obj) {}
   virtual ~Visitor() = default;
 };
 

@@ -10,13 +10,12 @@
 
 #include "cool-tree.handcode.h"
 #include "tree.h"
-
 // define the class for phylum
 // define simple phylum - Program
 typedef class Program_class *Program;
 
 class Program_class : public tree_node {
-public:
+ public:
   tree_node *copy() { return copy_Program(); }
   virtual Program copy_Program() = 0;
 
@@ -29,7 +28,7 @@ public:
 typedef class Class__class *Class_;
 
 class Class__class : public tree_node {
-public:
+ public:
   tree_node *copy() { return copy_Class_(); }
   virtual Class_ copy_Class_() = 0;
 
@@ -42,9 +41,13 @@ public:
 typedef class Feature_class *Feature;
 
 class Feature_class : public tree_node {
-public:
+ public:
+  enum Type { Method, Attribute };
+
+ public:
   tree_node *copy() { return copy_Feature(); }
   virtual Feature copy_Feature() = 0;
+  virtual Type type_of() const = 0;
 
 #ifdef Feature_EXTRAS
   Feature_EXTRAS
@@ -55,7 +58,7 @@ public:
 typedef class Formal_class *Formal;
 
 class Formal_class : public tree_node {
-public:
+ public:
   tree_node *copy() { return copy_Formal(); }
   virtual Formal copy_Formal() = 0;
 
@@ -68,9 +71,13 @@ public:
 typedef class Expression_class *Expression;
 
 class Expression_class : public tree_node {
-public:
+ public:
+  enum Type { Default, Block, Let };
+
+ public:
   tree_node *copy() { return copy_Expression(); }
   virtual Expression copy_Expression() = 0;
+  virtual Type type_of() const { return Type::Default; }
 
 #ifdef Expression_EXTRAS
   Expression_EXTRAS
@@ -81,7 +88,7 @@ public:
 typedef class Case_class *Case;
 
 class Case_class : public tree_node {
-public:
+ public:
   tree_node *copy() { return copy_Case(); }
   virtual Case copy_Case() = 0;
 
@@ -114,10 +121,10 @@ typedef Cases_class *Cases;
 // define the class for constructors
 // define constructor - program
 class program_class : public Program_class {
-protected:
+ protected:
   Classes classes;
 
-public:
+ public:
   program_class(Classes a1) { classes = a1; }
   Program copy_Program();
   void dump(std::ostream &stream, int n);
@@ -136,13 +143,13 @@ class class__class : public Class__class {
   friend class GetParentName;
   friend class GetFeatures;
 
-protected:
+ protected:
   Symbol name;
   Symbol parent;
   Features features;
   Symbol filename;
 
-public:
+ public:
   class__class(Symbol a1, Symbol a2, Features a3, Symbol a4) {
     name = a1;
     parent = a2;
@@ -166,14 +173,16 @@ public:
 class method_class : public Feature_class {
   friend class GetName;
   friend class GetType;
+  friend class GetFormals;
+  friend class GetExpression;
 
-protected:
+ protected:
   Symbol name;
   Formals formals;
   Symbol return_type;
   Expression expr;
 
-public:
+ public:
   method_class(Symbol a1, Formals a2, Symbol a3, Expression a4) {
     name = a1;
     formals = a2;
@@ -181,6 +190,7 @@ public:
     expr = a4;
   }
   Feature copy_Feature();
+  Type type_of() const override { return Type::Method; }
   void dump(std::ostream &stream, int n);
 
   void accept(Visitor &v) override { v.visit(*this); }
@@ -198,18 +208,19 @@ class attr_class : public Feature_class {
   friend class GetName;
   friend class GetType;
 
-protected:
+ protected:
   Symbol name;
   Symbol type_decl;
   Expression init;
 
-public:
+ public:
   attr_class(Symbol a1, Symbol a2, Expression a3) {
     name = a1;
     type_decl = a2;
     init = a3;
   }
   Feature copy_Feature();
+  Type type_of() const override { return Type::Attribute; }
   void dump(std::ostream &stream, int n);
 
   void accept(Visitor &v) override { v.visit(*this); }
@@ -224,17 +235,22 @@ public:
 
 // define constructor - formal
 class formal_class : public Formal_class {
-protected:
+  friend class GetName;
+  friend class GetType;
+
+ protected:
   Symbol name;
   Symbol type_decl;
 
-public:
+ public:
   formal_class(Symbol a1, Symbol a2) {
     name = a1;
     type_decl = a2;
   }
   Formal copy_Formal();
   void dump(std::ostream &stream, int n);
+
+  void accept(Visitor &v) override { v.visit(*this); }
 
 #ifdef Formal_SHARED_EXTRAS
   Formal_SHARED_EXTRAS
@@ -246,12 +262,12 @@ public:
 
 // define constructor - branch
 class branch_class : public Case_class {
-protected:
+ protected:
   Symbol name;
   Symbol type_decl;
   Expression expr;
 
-public:
+ public:
   branch_class(Symbol a1, Symbol a2, Expression a3) {
     name = a1;
     type_decl = a2;
@@ -270,11 +286,11 @@ public:
 
 // define constructor - assign
 class assign_class : public Expression_class {
-protected:
+ protected:
   Symbol name;
   Expression expr;
 
-public:
+ public:
   assign_class(Symbol a1, Expression a2) {
     name = a1;
     expr = a2;
@@ -292,13 +308,13 @@ public:
 
 // define constructor - static_dispatch
 class static_dispatch_class : public Expression_class {
-protected:
+ protected:
   Expression expr;
   Symbol type_name;
   Symbol name;
   Expressions actual;
 
-public:
+ public:
   static_dispatch_class(Expression a1, Symbol a2, Symbol a3, Expressions a4) {
     expr = a1;
     type_name = a2;
@@ -318,12 +334,12 @@ public:
 
 // define constructor - dispatch
 class dispatch_class : public Expression_class {
-protected:
+ protected:
   Expression expr;
   Symbol name;
   Expressions actual;
 
-public:
+ public:
   dispatch_class(Expression a1, Symbol a2, Expressions a3) {
     expr = a1;
     name = a2;
@@ -342,12 +358,12 @@ public:
 
 // define constructor - cond
 class cond_class : public Expression_class {
-protected:
+ protected:
   Expression pred;
   Expression then_exp;
   Expression else_exp;
 
-public:
+ public:
   cond_class(Expression a1, Expression a2, Expression a3) {
     pred = a1;
     then_exp = a2;
@@ -366,11 +382,11 @@ public:
 
 // define constructor - loop
 class loop_class : public Expression_class {
-protected:
+ protected:
   Expression pred;
   Expression body;
 
-public:
+ public:
   loop_class(Expression a1, Expression a2) {
     pred = a1;
     body = a2;
@@ -388,11 +404,11 @@ public:
 
 // define constructor - typcase
 class typcase_class : public Expression_class {
-protected:
+ protected:
   Expression expr;
   Cases cases;
 
-public:
+ public:
   typcase_class(Expression a1, Cases a2) {
     expr = a1;
     cases = a2;
@@ -410,13 +426,18 @@ public:
 
 // define constructor - block
 class block_class : public Expression_class {
-protected:
+  friend class GetExpressions;
+
+ protected:
   Expressions body;
 
-public:
+ public:
   block_class(Expressions a1) { body = a1; }
   Expression copy_Expression();
+  Type type_of() const override { return Type::Block; }
   void dump(std::ostream &stream, int n);
+
+  void accept(Visitor &v) override { v.visit(*this); }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -428,13 +449,16 @@ public:
 
 // define constructor - let
 class let_class : public Expression_class {
-protected:
+  friend class GetName;
+  friend class GetType;
+
+ protected:
   Symbol identifier;
   Symbol type_decl;
   Expression init;
   Expression body;
 
-public:
+ public:
   let_class(Symbol a1, Symbol a2, Expression a3, Expression a4) {
     identifier = a1;
     type_decl = a2;
@@ -442,7 +466,10 @@ public:
     body = a4;
   }
   Expression copy_Expression();
+  Type type_of() const override { return Type::Let; }
   void dump(std::ostream &stream, int n);
+
+  void accept(Visitor &v) override { v.visit(*this); }
 
 #ifdef Expression_SHARED_EXTRAS
   Expression_SHARED_EXTRAS
@@ -454,11 +481,11 @@ public:
 
 // define constructor - plus
 class plus_class : public Expression_class {
-protected:
+ protected:
   Expression e1;
   Expression e2;
 
-public:
+ public:
   plus_class(Expression a1, Expression a2) {
     e1 = a1;
     e2 = a2;
@@ -476,11 +503,11 @@ public:
 
 // define constructor - sub
 class sub_class : public Expression_class {
-protected:
+ protected:
   Expression e1;
   Expression e2;
 
-public:
+ public:
   sub_class(Expression a1, Expression a2) {
     e1 = a1;
     e2 = a2;
@@ -498,11 +525,11 @@ public:
 
 // define constructor - mul
 class mul_class : public Expression_class {
-protected:
+ protected:
   Expression e1;
   Expression e2;
 
-public:
+ public:
   mul_class(Expression a1, Expression a2) {
     e1 = a1;
     e2 = a2;
@@ -520,11 +547,11 @@ public:
 
 // define constructor - divide
 class divide_class : public Expression_class {
-protected:
+ protected:
   Expression e1;
   Expression e2;
 
-public:
+ public:
   divide_class(Expression a1, Expression a2) {
     e1 = a1;
     e2 = a2;
@@ -542,10 +569,10 @@ public:
 
 // define constructor - neg
 class neg_class : public Expression_class {
-protected:
+ protected:
   Expression e1;
 
-public:
+ public:
   neg_class(Expression a1) { e1 = a1; }
   Expression copy_Expression();
   void dump(std::ostream &stream, int n);
@@ -560,11 +587,11 @@ public:
 
 // define constructor - lt
 class lt_class : public Expression_class {
-protected:
+ protected:
   Expression e1;
   Expression e2;
 
-public:
+ public:
   lt_class(Expression a1, Expression a2) {
     e1 = a1;
     e2 = a2;
@@ -582,11 +609,11 @@ public:
 
 // define constructor - eq
 class eq_class : public Expression_class {
-protected:
+ protected:
   Expression e1;
   Expression e2;
 
-public:
+ public:
   eq_class(Expression a1, Expression a2) {
     e1 = a1;
     e2 = a2;
@@ -604,11 +631,11 @@ public:
 
 // define constructor - leq
 class leq_class : public Expression_class {
-protected:
+ protected:
   Expression e1;
   Expression e2;
 
-public:
+ public:
   leq_class(Expression a1, Expression a2) {
     e1 = a1;
     e2 = a2;
@@ -626,10 +653,10 @@ public:
 
 // define constructor - comp
 class comp_class : public Expression_class {
-protected:
+ protected:
   Expression e1;
 
-public:
+ public:
   comp_class(Expression a1) { e1 = a1; }
   Expression copy_Expression();
   void dump(std::ostream &stream, int n);
@@ -644,10 +671,10 @@ public:
 
 // define constructor - int_const
 class int_const_class : public Expression_class {
-protected:
+ protected:
   Symbol token;
 
-public:
+ public:
   int_const_class(Symbol a1) { token = a1; }
   Expression copy_Expression();
   void dump(std::ostream &stream, int n);
@@ -662,10 +689,10 @@ public:
 
 // define constructor - bool_const
 class bool_const_class : public Expression_class {
-protected:
+ protected:
   Boolean val;
 
-public:
+ public:
   bool_const_class(Boolean a1) { val = a1; }
   Expression copy_Expression();
   void dump(std::ostream &stream, int n);
@@ -680,10 +707,10 @@ public:
 
 // define constructor - string_const
 class string_const_class : public Expression_class {
-protected:
+ protected:
   Symbol token;
 
-public:
+ public:
   string_const_class(Symbol a1) { token = a1; }
   Expression copy_Expression();
   void dump(std::ostream &stream, int n);
@@ -698,10 +725,10 @@ public:
 
 // define constructor - new_
 class new__class : public Expression_class {
-protected:
+ protected:
   Symbol type_name;
 
-public:
+ public:
   new__class(Symbol a1) { type_name = a1; }
   Expression copy_Expression();
   void dump(std::ostream &stream, int n);
@@ -716,10 +743,10 @@ public:
 
 // define constructor - isvoid
 class isvoid_class : public Expression_class {
-protected:
+ protected:
   Expression e1;
 
-public:
+ public:
   isvoid_class(Expression a1) { e1 = a1; }
   Expression copy_Expression();
   void dump(std::ostream &stream, int n);
@@ -734,8 +761,8 @@ public:
 
 // define constructor - no_expr
 class no_expr_class : public Expression_class {
-protected:
-public:
+ protected:
+ public:
   no_expr_class() {}
   Expression copy_Expression();
   void dump(std::ostream &stream, int n);
@@ -750,10 +777,10 @@ public:
 
 // define constructor - object
 class object_class : public Expression_class {
-protected:
+ protected:
   Symbol name;
 
-public:
+ public:
   object_class(Symbol a1) { name = a1; }
   Expression copy_Expression();
   void dump(std::ostream &stream, int n);
@@ -767,36 +794,60 @@ public:
 };
 
 class GetName : public Visitor {
-public:
+ public:
   std::string value;
 
   void visit(class__class &obj) override { value = obj.name->get_string(); }
   void visit(method_class &obj) override { value = obj.name->get_string(); }
   void visit(attr_class &obj) override { value = obj.name->get_string(); }
-};
-
-class GetParentName : public Visitor {
-public:
-  std::string value;
-
-  void visit(class__class &obj) override { value = obj.parent->get_string(); }
-};
-
-class GetFeatures : public Visitor {
-public:
-  Features value;
-  
-  void visit(class__class &obj) override { value = obj.features; }
+  void visit(formal_class &obj) override { value = obj.name->get_string(); }
+  void visit(let_class &obj) override { value = obj.identifier->get_string(); }
 };
 
 class GetType : public Visitor {
-public:
+ public:
   std::string value;
 
   void visit(method_class &obj) override {
     value = obj.return_type->get_string();
   }
   void visit(attr_class &obj) override { value = obj.type_decl->get_string(); }
+  void visit(formal_class &obj) override {
+    value = obj.type_decl->get_string();
+  }
+  void visit(let_class &obj) override { value = obj.type_decl->get_string(); }
+};
+
+class GetParentName : public Visitor {
+ public:
+  std::string value;
+
+  void visit(class__class &obj) override { value = obj.parent->get_string(); }
+};
+
+class GetFeatures : public Visitor {
+ public:
+  Features value = nullptr;
+
+  void visit(class__class &obj) override { value = obj.features; }
+};
+
+class GetFormals : public Visitor {
+ public:
+  Formals value = nullptr;
+  void visit(method_class &obj) override { value = obj.formals; }
+};
+
+class GetExpression : public Visitor {
+ public:
+  Expression value = nullptr;
+  void visit(method_class &obj) override { value = obj.expr; }
+};
+
+class GetExpressions : public Visitor {
+ public:
+  Expressions value = nullptr;
+  void visit(block_class &obj) override { value = obj.body; }
 };
 
 // define the prototypes of the interface
